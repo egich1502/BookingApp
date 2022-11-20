@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width"/>
+  <title>Title</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        rel="stylesheet">
+</head>
+<body>
+<h2>Список столов</h2>
+<form name="bookingsForm">
+  <div class="form-group">
+    <label for="bookingTitle">Название бронирования:</label>
+    <input class="form-control" name="bookingTitle"/>
+  </div>
+  <div class="form-group">
+    <label for="bookingDate">Дата:</label>
+    <input class="form-control" name="bookingDate" type="date"/>
+  </div>
+  <div class="form-group">
+    <label for="bookingClient">Клиент:</label>
+    <input class="form-control" name="bookingClient"/>
+  </div>
+  <div class="panel-body">
+    <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+  </div>
+</form>
+<table class="table table-condensed table-striped table-bordered">
+  <thead>
+  <tr>
+    <th>Название</th>
+  </tr>
+  </thead>
+  <tbody>
+
+  </tbody>
+</table>
+
+<script>
+  async function GetBookings() {
+    const response = await fetch(document.URL, {
+      method: "GET",
+      headers: {"Accept": "application/json"}
+    });
+    if (response.ok === true) {
+      const tables = await response.json();
+      let rows = document.querySelector("tbody");
+      tables.forEach(table => {
+        rows.append(row(table));
+      });
+    }
+  }
+
+  async function NewBooking(bookingTitle, date, bookingClient) {
+    const response = await fetch(document.URL + "/new", {
+      method: "POST",
+      headers: {"Accept": "application/json", "Content-Type": "application/json"},
+      body: JSON.stringify({
+        title: bookingTitle,
+        bookingDate: date,
+        client: bookingClient
+      })
+    });
+    if (response.ok === true) {
+      const booking = await response.json();
+      reset();
+      document.querySelector("tbody").append(row(booking));
+    }
+  }
+
+  function reset() {
+    const form = document.forms["tablesForm"];
+    form.reset();
+    form.elements["id"].value = 0;
+  }
+
+  function row(booking) {
+    const tr = document.createElement("tr");
+    tr.setAttribute("data-rowid", booking.id);
+
+    const idTd = document.createElement("td");
+    idTd.append(booking.id);
+    tr.append(idTd);
+
+    const titleTd = document.createElement("td");
+    titleTd.append(booking.title);
+    tr.append(titleTd);
+
+    const dateTd = document.createElement("td");
+    dateTd.append(booking.bookingDate);
+    tr.append(dateTd);
+
+    const clientTd = document.createElement("td");
+    clientTd.append(booking.client);
+    tr.append(clientTd);
+
+    return tr;
+  }
+
+  document.forms["userForm"].addEventListener("submit", e => {
+    e.preventDefault();
+    const form = document.forms["tablesForm"];
+    const title = form.elements["bookingTitle"].value;
+    const date = form.elements["bookingDate"].value;
+    const client = form.elements["bookingClient"].value;
+    NewBooking(title, date, client);
+  });
+
+
+  GetBookings();
+</script>
+
+</body>
+</html>
