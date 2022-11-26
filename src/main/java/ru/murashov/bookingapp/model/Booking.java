@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.Date;
 import java.util.Objects;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -31,7 +32,8 @@ public class Booking {
 
   private String title;
 
-  @JsonFormat(shape = Shape.STRING, pattern = "dd.MM.yyyy")
+  @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd")
+  @Column(unique = true)
   Date bookingDate;
 
 

@@ -13,7 +13,7 @@ import ru.murashov.bookingapp.model.EatingTable;
 import ru.murashov.bookingapp.service.EatingTableService;
 
 @RestController
-@RequestMapping("tables")
+@RequestMapping("api/tables")
 public class EatingTableController {
 
   private final EatingTableService eatingTableService;
@@ -35,7 +35,6 @@ public class EatingTableController {
 
   @PostMapping(path = "save", consumes = "application/json", produces = "application/json")
   public ResponseEntity<EatingTable> saveTable(@RequestBody EatingTable eatingTable) {
-    EatingTable newEatingTable = eatingTableService.saveTable(eatingTable);
-    return ResponseEntity.ok(newEatingTable);
+    return ResponseEntity.ok(eatingTableService.saveTable(eatingTable));
   }
 }

@@ -22,7 +22,7 @@ public class EatingTableService {
     return tableRepository.findById(id).get();
   }
 
-  public EatingTable saveTable(EatingTable eatingTable){
+  public EatingTable saveTable(EatingTable eatingTable) {
     return tableRepository.save(eatingTable);
   }
 

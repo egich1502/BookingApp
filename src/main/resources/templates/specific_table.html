@@ -9,18 +9,18 @@
 </head>
 <body>
 <h2>Список столов</h2>
-<form name="bookingsForm">
+<form id="bookingsForm">
   <div class="form-group">
     <label for="bookingTitle">Название бронирования:</label>
-    <input class="form-control" name="bookingTitle"/>
+    <input class="form-control" id="bookingTitle"/>
   </div>
   <div class="form-group">
     <label for="bookingDate">Дата:</label>
-    <input class="form-control" name="bookingDate" type="date"/>
+    <input class="form-control" id="bookingDate" type="date"/>
   </div>
   <div class="form-group">
     <label for="bookingClient">Клиент:</label>
-    <input class="form-control" name="bookingClient"/>
+    <input class="form-control" id="bookingClient"/>
   </div>
   <div class="panel-body">
     <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
@@ -39,21 +39,25 @@
 
 <script>
   async function GetBookings() {
-    const response = await fetch(document.URL, {
+    const response = await fetch('/api' + window.location.pathname, {
       method: "GET",
       headers: {"Accept": "application/json"}
     });
     if (response.ok === true) {
-      const tables = await response.json();
+      const bookings = await response.json();
       let rows = document.querySelector("tbody");
-      tables.forEach(table => {
-        rows.append(row(table));
+      let curDate = new Date();
+      bookings.forEach(booking => {
+        let bookingDate = new Date(booking.bookingDate);
+        if (bookingDate > curDate) {
+          rows.append(row(booking));
+        }
       });
     }
   }
 
   async function NewBooking(bookingTitle, date, bookingClient) {
-    const response = await fetch(document.URL + "/new", {
+    const response = await fetch('/api' + window.location.pathname + "/new", {
       method: "POST",
       headers: {"Accept": "application/json", "Content-Type": "application/json"},
       body: JSON.stringify({
@@ -64,15 +68,22 @@
     });
     if (response.ok === true) {
       const booking = await response.json();
+      console.log(booking.bookingDate);
       reset();
       document.querySelector("tbody").append(row(booking));
+    } else {
+      const booking = await response.json();
+      let form = document.getElementById('bookingsForm');
+      form.reset()
+      form.elements["bookingTitle"].value = booking.title;
+      form.elements["bookingClient"].value = booking.client;
+      alert('Выбранное время занято, выбирите другое');
     }
   }
 
   function reset() {
-    const form = document.forms["tablesForm"];
+    const form = document.getElementById('bookingsForm');
     form.reset();
-    form.elements["id"].value = 0;
   }
 
   function row(booking) {
@@ -98,15 +109,14 @@
     return tr;
   }
 
-  document.forms["userForm"].addEventListener("submit", e => {
+  document.forms["bookingsForm"].addEventListener("submit", e => {
     e.preventDefault();
-    const form = document.forms["tablesForm"];
+    const form = document.getElementById("bookingsForm");
     const title = form.elements["bookingTitle"].value;
     const date = form.elements["bookingDate"].value;
     const client = form.elements["bookingClient"].value;
     NewBooking(title, date, client);
   });
-
 
   GetBookings();
 </script>

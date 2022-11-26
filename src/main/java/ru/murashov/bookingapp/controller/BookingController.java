@@ -2,6 +2,7 @@ package ru.murashov.bookingapp.controller;
 
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,12 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.murashov.bookingapp.model.Booking;
-import ru.murashov.bookingapp.model.EatingTable;
 import ru.murashov.bookingapp.service.BookingService;
 import ru.murashov.bookingapp.service.EatingTableService;
 
 @RestController
-@RequestMapping("tables/{table_id}/booking")
+@RequestMapping("api/tables/{tableId}/booking")
 public class BookingController {
 
   private final EatingTableService eatingTableService;
@@ -28,26 +28,24 @@ public class BookingController {
   }
 
   @GetMapping(path = "", produces = "application/json")
-  public Set<Booking> getAllBookingsForTable(@PathVariable("table_id") int id) {
-    EatingTable table = eatingTableService.getTableById(id);
-    return table.getBookings();
+  public Set<Booking> getAllBookingsForTable(@PathVariable("tableId") int id) {
+    return eatingTableService.getTableById(id).getBookings();
   }
 
-  @GetMapping(path = "{booking_id}", produces = "application/json")
-  public Booking getBookingById(@PathVariable("table_id") int tableId,
-      @PathVariable int booking_id) {
-    EatingTable table = eatingTableService.getTableById(tableId);
-    Set<Booking> bookings = table.getBookings();
-    return bookings.stream().filter(x -> x.getId().equals(booking_id)).toList().get(0);
+  @GetMapping(path = "{bookingId}", produces = "application/json")
+  public Booking getBookingById(@PathVariable("tableId") int tableId, @PathVariable int bookingId) {
+    return bookingService.getBookingById(tableId, bookingId);
   }
 
   @PostMapping(path = "new", consumes = "application/json", produces = "application/json")
-  public ResponseEntity<Booking> saveNewBooking(@PathVariable int table_id,
+  public ResponseEntity<Booking> saveNewBooking(@PathVariable int tableId,
       @RequestBody Booking booking) {
-    EatingTable table = eatingTableService.getTableById(table_id);
-    booking.setEatingTable(table.getId());
-    table.getBookings().add(booking);
-    return ResponseEntity.ok(bookingService.save(booking));
+    Booking newBooking = bookingService.saveNewBooking(tableId, booking);
+    if (newBooking != null) {
+      return ResponseEntity.ok(newBooking);
+    } else {
+      return new ResponseEntity<>(booking, HttpStatus.BAD_REQUEST);
+    }
   }
 
 }
